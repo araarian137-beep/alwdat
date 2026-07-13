@@ -15,17 +15,8 @@ from datetime import datetime
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import StreamingResponse
 
-from main import (
-    LINKS,
-    LINKS_LOCK,
-    stats,
-    hourly_traffic,
-    connections,
-    error_logs,
-    logger,
-    is_link_allowed,
-    save_state,
-)
+import main
+
 from relay_vless import parse_vless_header, check_and_use
 
 router = APIRouter()
@@ -222,7 +213,7 @@ async def _get_or_create_session(uuid: str, mode: str, session_id: str, ip: str 
             "flow": None,  # لازی ساخته می‌شه: _AdaptiveFlow مخصوص stream-up
         }
         xhttp_sessions[session_id] = sess
-        logger.info(f"new XHTTP[{mode}] session [{session_id[:8]}] uuid={uuid[:8]} ip={ip}")
+        main.logger.info(f"new XHTTP[{mode}] session [{session_id[:8]}] uuid={uuid[:8]} ip={ip}")
         return sess
 
 
@@ -254,7 +245,7 @@ async def _teardown(session_id: str):
             dq.put_nowait(None)
         except Exception:
             pass
-    logger.info(f"closed XHTTP[{sess.get('mode')}] [{session_id[:8]}] total={len(xhttp_sessions)}")
+    main.logger.info(f"closed XHTTP[{sess.get('mode')}] [{session_id[:8]}] total={len(xhttp_sessions)}")
 
 
 async def _reaper():
@@ -318,7 +309,7 @@ async def _pump_tcp_to_queue(session_id: str, uuid: str, reader: asyncio.StreamR
 async def _open_tcp_for_session(session_id: str, uuid: str, sess: dict, first_chunk: bytes):
     """تونل TCP رو از روی هدر VLESS باز می‌کنه و پمپ دانلینک رو راه می‌اندازه."""
     reader, writer, address, port = await _open_tcp_from_header(first_chunk)
-    logger.info(f"connect XHTTP[{sess['mode']}] [{session_id[:8]}] -> {address}:{port}")
+    main.logger.info(f"connect XHTTP[{sess['mode']}] [{session_id[:8]}] -> {address}:{port}")
     sess["writer"] = writer
     sess["tcp_open"] = True
     sess["downlink_task"] = asyncio.create_task(

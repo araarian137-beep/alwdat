@@ -15,7 +15,7 @@ import main
 # VLESS Relay — بهینه‌شده برای حداکثر throughput
 # ══════════════════════════════════════════════════════════════════════════════
 
-RELAY_BUF = 256 * 1024   # 256 KB buffer
+main.RELAY_BUF = 256 * 1024   # 256 KB buffer
 
 def _ws_client_ip(ws: WebSocket) -> str:
     fwd = ws.headers.get("x-forwarded-for")
@@ -74,7 +74,7 @@ async def relay_ws_to_tcp(ws: WebSocket, writer: asyncio.StreamWriter, conn_id: 
             stats["total_requests"] += 1
             connections[conn_id]["bytes"] += len(data)
             writer.write(data)
-            if writer.transport.get_write_buffer_size() > RELAY_BUF:
+            if writer.transport.get_write_buffer_size() > main.RELAY_BUF:
                 await writer.drain()
     except (WebSocketDisconnect, Exception):
         pass
@@ -88,7 +88,7 @@ async def relay_tcp_to_ws(ws: WebSocket, reader: asyncio.StreamReader, conn_id: 
     first = True
     try:
         while True:
-            data = await reader.read(RELAY_BUF)
+            data = await reader.read(main.RELAY_BUF)
             if not data:
                 break
             if not await check_and_use(uid, len(data)):
@@ -108,7 +108,7 @@ async def websocket_tunnel(ws: WebSocket, uuid: str):
         link = LINKS.get(uuid)
 
     if not is_link_allowed(link):
-        logger.warning(f"🚫 WS rejected uuid={uuid[:8]}… (not allowed)")
+        main.logger.warning(f"🚫 WS rejected uuid={uuid[:8]}… (not allowed)")
         await ws.close(code=1008, reason="not authorized")
         return
 
@@ -121,7 +121,7 @@ async def websocket_tunnel(ws: WebSocket, uuid: str):
         "connected_at": datetime.now().isoformat(),
         "bytes": 0,
     }
-    logger.info(f"✅ WS [{conn_id}] uuid={uuid[:8]}… ip={ip} total={len(connections)}")
+    main.logger.info(f"✅ WS [{conn_id}] uuid={uuid[:8]}… ip={ip} total={len(connections)}")
     log_activity("connection", f"اتصال جدید از {ip} (کانفیگ {link.get('label','?')})", "info")
     writer = None
 
@@ -141,7 +141,7 @@ async def websocket_tunnel(ws: WebSocket, uuid: str):
 
         stats["total_requests"] += 1
         connections[conn_id]["bytes"] += len(first_chunk)
-        logger.info(f"➡️  [{conn_id}] → {address}:{port}")
+        main.logger.info(f"➡️  [{conn_id}] → {address}:{port}")
 
         reader, writer = await asyncio.wait_for(
             asyncio.open_connection(address, port),
@@ -180,7 +180,7 @@ async def websocket_tunnel(ws: WebSocket, uuid: str):
     except Exception as exc:
         stats["total_errors"] += 1
         error_logs.append({"error": str(exc), "time": datetime.now().isoformat()})
-        logger.error(f"WS error [{conn_id}]: {exc}")
+        main.logger.error(f"WS error [{conn_id}]: {exc}")
     finally:
         if writer:
             try:
@@ -189,4 +189,4 @@ async def websocket_tunnel(ws: WebSocket, uuid: str):
             except Exception:
                 pass
         connections.pop(conn_id, None)
-        logger.info(f"🔌 WS closed [{conn_id}] total={len(connections)}")
+        main.logger.info(f"🔌 WS closed [{conn_id}] total={len(connections)}")
