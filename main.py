@@ -69,7 +69,7 @@ def _get_or_create_secret() -> str:
 
 
 CONFIG = {
-    "port": int(os.environ.get("PORT", 8000)),
+    "port": int(os.environ.get("PORT", 8100)),
     "secret": _get_or_create_secret(),
     "host": os.environ.get("RAILWAY_PUBLIC_DOMAIN", "localhost"),
 }
@@ -995,7 +995,7 @@ async def test_ws_redirect():
 
 async def main_runner():
     # خواندن پورت از متغیرهای سیستم (پیش‌فرض ۸۰۰۰)
-    port = int(os.environ.get("PORT", 8000))
+    port = int(os.environ.get("PORT", 8100))
     
     # لود تأخیری ماژول‌ها برای شکستن قفل چرخه‌ای ایمپورت رندر
     import relay_vless
