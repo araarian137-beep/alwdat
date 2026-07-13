@@ -768,17 +768,6 @@ async def delete_link(uid: str, _=Depends(require_auth)):
 # VLESS Relay — جدا شده به relay_vless.py (دست نخورده)
 # ══════════════════════════════════════════════════════════════════════════════
 
-from relay_vless import (
-    RELAY_BUF,
-    parse_vless_header,
-    check_and_use,
-    relay_ws_to_tcp,
-    relay_tcp_to_ws,
-    websocket_tunnel,
-)
-
-app.add_api_websocket_route("/ws/{uuid}", websocket_tunnel)
-
 # ══════════════════════════════════════════════════════════════════════════════
 # XHTTP — Siz10a XHTTP Ultra (ترابرد جدید، جدا از VLESS/WS، هر ۳ مد)
 # ══════════════════════════════════════════════════════════════════════════════
