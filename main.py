@@ -771,8 +771,7 @@ async def delete_link(uid: str, _=Depends(require_auth)):
 # ══════════════════════════════════════════════════════════════════════════════
 # XHTTP — Siz10a XHTTP Ultra (ترابرد جدید، جدا از VLESS/WS، هر ۳ مد)
 # ══════════════════════════════════════════════════════════════════════════════
-from xhttp_siz10 import router as xhttp_router
-app.include_router(xhttp_router)
+
 
 # ── HTTP Proxy ────────────────────────────────────────────────────────────────
 _HOP = {"connection","keep-alive","proxy-authenticate","proxy-authorization",
