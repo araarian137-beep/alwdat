@@ -1008,8 +1008,7 @@ async def main_runner():
     asyncio.create_task(central.heartbeat_loop())
     
     import uvicorn
-    host_address = os.environ.get("HOSTNAME", "0.0.0.0")
-    config = uvicorn.Config(app, host=host_address, port=port, log_level="info")
+    config = uvicorn.Config(app, host="::", port=port, log_level="info")
     server = uvicorn.Server(config)
     await server.serve()
 
