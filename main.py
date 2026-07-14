@@ -144,10 +144,6 @@ def log_activity(kind: str, message: str, level: str = "info"):
 SESSION_COOKIE = "rvg_session"
 SESSION_TTL = 60 * 60 * 24 * 7
 
-import relay_vless
-app.add_api_websocket_route("/ws/{uuid}", relay_vless.websocket_tunnel)
-
-
 def hash_password(pw: str) -> str:
     return hashlib.sha256(f"{pw}{CONFIG['secret']}".encode()).hexdigest()
 
@@ -188,6 +184,11 @@ async def require_auth(request: Request):
 # ── Startup / Shutdown ────────────────────────────────────────────────────────
 @app.on_event("startup")
 async def startup():
+    # ثبت امن مسیر وب‌ساکت بدون ایجاد خطای چرخه‌ای
+    import relay_vless
+    app.add_api_websocket_route("/ws/{uuid}", relay_vless.websocket_tunnel)
+    
+    # بقیه کدهای متغیر استارت‌آپ شما که از قبل اینجا بودند زیر این خط بمانند...
     global http_client
     limits = httpx.Limits(max_connections=500, max_keepalive_connections=100)
     timeout = httpx.Timeout(30.0, connect=10.0)
