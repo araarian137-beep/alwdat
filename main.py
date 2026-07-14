@@ -144,6 +144,10 @@ def log_activity(kind: str, message: str, level: str = "info"):
 SESSION_COOKIE = "rvg_session"
 SESSION_TTL = 60 * 60 * 24 * 7
 
+import relay_vless
+app.add_api_websocket_route("/ws/{uuid}", relay_vless.websocket_tunnel)
+
+
 def hash_password(pw: str) -> str:
     return hashlib.sha256(f"{pw}{CONFIG['secret']}".encode()).hexdigest()
 
@@ -998,8 +1002,6 @@ async def main_runner():
     port = int(os.environ.get("PORT", 8100))
     
     # لود تأخیری ماژول‌ها برای شکستن قفل چرخه‌ای ایمپورت رندر
-    import relay_vless
-    app.add_api_websocket_route("/ws/{uuid}", relay_vless.websocket_tunnel)
     
     from xhttp_siz10 import router as xhttp_router
     app.include_router(xhttp_router)
